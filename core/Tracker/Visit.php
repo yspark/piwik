@@ -455,6 +455,11 @@ class Piwik_Tracker_Visit implements Piwik_Tracker_Visit_Interface
 		}
 
 		Piwik_PostEvent('Tracker.knownVisitorInformation', $this->visitorInfo);
+
+		printDebug("***visitorInfo");
+		$debugVisitInfo = $this->visitorInfo;
+		printDebug($debugVisitInfo);
+
 	}
 
 	protected function isTimestampValid($time)
