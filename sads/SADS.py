@@ -3,16 +3,33 @@ from select import select
 import sys
 import json
 
+from Mysql import SADS_Mysql
+from Utilities import Utilities
+
 class SADS:
     def __init__(self):
+        # SADS dictionary data structure
         self.sadsDictionary = {}
+        
+        # MySQL object
+        self.mysql = SADS_Mysql()
+        self.mysql.connect()
     #end def __init__(self):
     
-    def recvVisitorInfo(self, visitorInfo):
+    # Main handler method deals with Visitor's information
+    def handleVisitorInfo(self, visitorInfo):
+        
+        location_ip = Utilities.convertNumericIpToHex(visitorInfo['ip'])
+            
+        newVisitCount = self.mysql.getVisitCount(location_ip)
+        
         if self.sadsDictionary.has_key(visitorInfo['ip']):
-            self.sadsDictionary[visitorInfo['ip']] += 1
-        else:
-            self.sadsDictionary[visitorInfo['ip']] = 1
+            currentVisitCount = self.sadsDictionary[visitorInfo['ip']]         
+        
+            if currentVisitCount != newVisitCount -1 and currentVisitCount != newVisitCount:
+                print 'Warning: visit count is jumped from '+ str(currentVisitCount) + " to " + str(newVisitCount)
+                
+        self.sadsDictionary[visitorInfo['ip']] = newVisitCount
         
         print self.sadsDictionary
     #end def recvVisitorInfo()
@@ -22,7 +39,7 @@ class SADS:
 
 if __name__ == "__main__":
     sads = SADS()
-    
+        
     # Listen to socket
     port = 5500
     host = ''
@@ -62,7 +79,7 @@ if __name__ == "__main__":
                     visitorInfo = json.loads(recv_msg)
                     visitorInfo["ip"] = clientIp   
                     
-                    sads.recvVisitorInfo(visitorInfo)                                                                                     
+                    sads.handleVisitorInfo(visitorInfo)                                                                                     
                 #end if
         #end for
     #end while
